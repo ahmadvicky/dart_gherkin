@@ -3,30 +3,86 @@ import '../gherkin/runnables/debug_information.dart';
 import '../gherkin/steps/step_run_result.dart';
 import './message_level.dart';
 import './messages.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/widgets.dart';
+import 'dart:io';
 
 class ProgressReporter extends StdoutReporter {
+
+  List<String> scenarioList = [];
+
   @override
   Future<void> onScenarioStarted(StartedMessage message) async {
     printMessageLine(
         'Running scenario: ${_getNameAndContext(message.name, message.context)}',
         StdoutReporter.WARN_COLOR);
+    scenarioList.add('Running scenario ${message.name}');
   }
 
   @override
   Future<void> onScenarioFinished(ScenarioFinishedMessage message) async {
-    printMessageLine(
-        "${message.passed ? 'PASSED' : 'FAILED'}: Scenario ${_getNameAndContext(message.name, message.context)}",
+    printMessageLine("${message.passed ? 'PASSED' : 'FAILED'}: Scenario ${message.name}",
         message.passed ? StdoutReporter.PASS_COLOR : StdoutReporter.FAIL_COLOR);
+    scenarioList.add('Finish Scenario ${message.name}');
+
+    final pdf = pw.Document();
+
+    pdf.addPage(pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        build: (pw.Context context) {
+          return pw.Column(
+              children: [
+                pw.Container(
+                    margin: pw.EdgeInsets.only(bottom: 10),
+                    alignment: pw.Alignment.centerLeft,
+                    child: pw.Text(
+                        '${message.name}',
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 12,
+                        )
+                    )
+                ),
+                pw.ListView.builder(itemCount: scenarioList.length, itemBuilder: (context,index) {
+                  return pw.Container(
+                      alignment: pw.Alignment.centerLeft,
+                      child: pw.Text(
+                          '${scenarioList[index]}',
+                          textAlign: pw.TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 12,
+                          )
+                      )
+                  );
+
+                })
+              ]
+          ); // Center
+        }));
+    // scenarioList.forEach((element) {
+    //
+    //   // Page
+    // });
+
+    final file = File("report/${_getNameFile(message.name)}.pdf");
+    await file.writeAsBytes(pdf.save());
+
   }
+
+
 
   @override
   Future<void> onStepFinished(StepFinishedMessage message) async {
+    scenarioList.add('${message.name}');
     printMessageLine(
         [
           '  ',
           _getStatePrefixIcon(message.result.result),
           _getNameAndContext(message.name, message.context),
-          _getExecutionDuration(message.result),
+          // _getExecutionDuration(message.result),
           _getReasonMessage(message.result),
           _getErrorMessage(message.result)
         ].join((' ')).trimRight(),
@@ -68,7 +124,13 @@ class ProgressReporter extends StdoutReporter {
   }
 
   String _getNameAndContext(String name, RunnableDebugInformation context) {
-    return "$name # ${context.filePath.replaceAll(RegExp(r"\.\\"), "")}:${context.lineNumber}";
+    return "$name";
+    // "${context.filePath.replaceAll(RegExp(r"\.\\"), "")}:${context.lineNumber}";
+  }
+
+  String _getNameFile(String name){
+    name = name.replaceAll(' ','');
+    return name;
   }
 
   String _getExecutionDuration(StepResult stepResult) {
