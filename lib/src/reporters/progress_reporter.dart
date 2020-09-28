@@ -129,7 +129,8 @@ class ProgressReporter extends StdoutReporter {
   }
 
   String _getNameFile(String name){
-    name = name.replaceAll(' ','');
+    name = name.toLowerCase();
+    name = name.replaceAll(' ','_');
     return name;
   }
 
