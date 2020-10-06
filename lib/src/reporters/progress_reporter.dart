@@ -7,24 +7,28 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
+
 
 class ProgressReporter extends StdoutReporter {
 
-  List<String> scenarioList = [];
+  List<itemPDF> scenarioList = [];
 
   @override
   Future<void> onScenarioStarted(StartedMessage message) async {
     printMessageLine(
         'Running scenario: ${_getNameAndContext(message.name, message.context)}',
         StdoutReporter.WARN_COLOR);
-    scenarioList.add('Running scenario ${message.name}');
+    scenarioList.add(itemPDF(desc: 'Running scenario ${message.name}'));
   }
 
   @override
   Future<void> onScenarioFinished(ScenarioFinishedMessage message) async {
     printMessageLine("${message.passed ? 'PASSED' : 'FAILED'}: Scenario ${message.name}",
         message.passed ? StdoutReporter.PASS_COLOR : StdoutReporter.FAIL_COLOR);
-    scenarioList.add('Finish Scenario ${message.name}');
+    // scenarioList.add('Finish Scenario ${message.name}');
+    scenarioList.add(itemPDF(desc: 'Finish Scenario ${message.name}'));
+
 
     final pdf = pw.Document();
 
@@ -50,10 +54,11 @@ class ProgressReporter extends StdoutReporter {
                   return pw.Container(
                       alignment: pw.Alignment.centerLeft,
                       child: pw.Text(
-                          '${scenarioList[index]}',
+                          '${scenarioList[index].desc}',
                           textAlign: pw.TextAlign.left,
                           style: TextStyle(
                             fontSize: 12,
+                            color: scenarioList[index].isPassed != null ? scenarioList[index].isPassed ? Colors.green : Colors.red : Colors.black
                           )
                       )
                   );
@@ -77,6 +82,9 @@ class ProgressReporter extends StdoutReporter {
   @override
   Future<void> onStepFinished(StepFinishedMessage message) async {
     scenarioList.add('${message.name}');
+    scenarioList.add(itemPDF(desc: '${_getStatePrefixIcon(message.result.result)} ${message.name}',isPassed: _isPassed(message.result.result)));
+
+
     printMessageLine(
         [
           '  ',
@@ -153,6 +161,21 @@ class ProgressReporter extends StdoutReporter {
     return '';
   }
 
+  String _isPassed(StepExecutionResult result) {
+    switch (result) {
+      case StepExecutionResult.pass:
+        return true;
+      case StepExecutionResult.error:
+      case StepExecutionResult.fail:
+      case StepExecutionResult.timeout:
+        return false;
+      case StepExecutionResult.skipped:
+        return false;
+    }
+
+    return '';
+  }
+
   String _getMessageColour(StepExecutionResult result) {
     switch (result) {
       case StepExecutionResult.pass:
@@ -169,4 +192,12 @@ class ProgressReporter extends StdoutReporter {
 
     return StdoutReporter.RESET_COLOR;
   }
+}
+
+class itemPDF {
+  String desc;
+  bool isPassed;
+  itemPDF({
+   this.desc,this.isPassed
+  });
 }
