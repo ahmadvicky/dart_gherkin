@@ -27,7 +27,7 @@ class ProgressReporter extends StdoutReporter {
     printMessageLine("${message.passed ? 'PASSED' : 'FAILED'}: Scenario ${message.name}",
         message.passed ? StdoutReporter.PASS_COLOR : StdoutReporter.FAIL_COLOR);
     // scenarioList.add('Finish Scenario ${message.name}');
-    scenarioList.add(itemPDF(desc: 'Finish Scenario ${message.name}'));
+    scenarioList.add(itemPDF(desc: 'Finish Scenario ${message.name} ${message.passed ? 'PASSED' : 'FAILED'}'));
 
 
     final pdf = pw.Document();
@@ -47,6 +47,7 @@ class ProgressReporter extends StdoutReporter {
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 12,
+                          color: Colors.red
                         )
                     )
                 ),
