@@ -7,8 +7,6 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 import 'dart:io';
-import 'package:flutter/material.dart';
-
 
 class ProgressReporter extends StdoutReporter {
 
@@ -45,9 +43,8 @@ class ProgressReporter extends StdoutReporter {
                         '${message.name}',
                         textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.red
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 12,
                         )
                     )
                 ),
@@ -58,8 +55,8 @@ class ProgressReporter extends StdoutReporter {
                           '${scenarioList[index].desc}',
                           textAlign: pw.TextAlign.left,
                           style: TextStyle(
-                            fontSize: 12,
-                            color: scenarioList[index].isPassed != null ? scenarioList[index].isPassed ? Colors.green : Colors.red : Colors.black
+                              fontSize: 12,
+                              color: scenarioList[index].isPassed != null ? scenarioList[index].isPassed ? PdfColor(0,10,0) : PdfColor(10,0,0) : PdfColor(0,0,0)
                           )
                       )
                   );
@@ -82,8 +79,8 @@ class ProgressReporter extends StdoutReporter {
 
   @override
   Future<void> onStepFinished(StepFinishedMessage message) async {
-    scenarioList.add('${message.name}');
-    scenarioList.add(itemPDF(desc: '${_getStatePrefixIcon(message.result.result)} ${message.name}',isPassed: _isPassed(message.result.result)));
+    // scenarioList.add('');
+    scenarioList.add(itemPDF(desc: '${message.name}',isPassed: true));
 
 
     printMessageLine(
@@ -162,20 +159,19 @@ class ProgressReporter extends StdoutReporter {
     return '';
   }
 
-  String _isPassed(StepExecutionResult result) {
-    switch (result) {
-      case StepExecutionResult.pass:
-        return true;
-      case StepExecutionResult.error:
-      case StepExecutionResult.fail:
-      case StepExecutionResult.timeout:
-        return false;
-      case StepExecutionResult.skipped:
-        return false;
-    }
-
-    return '';
-  }
+  // String _isPassed(StepExecutionResult result) {
+  //   switch (result) {
+  //     case StepExecutionResult.pass:
+  //       return true;
+  //     case StepExecutionResult.error:
+  //     case StepExecutionResult.fail:
+  //     case StepExecutionResult.timeout:
+  //       return false;
+  //     case StepExecutionResult.skipped:
+  //       return false;
+  //   }
+  //   return false;
+  // }
 
   String _getMessageColour(StepExecutionResult result) {
     switch (result) {
@@ -197,8 +193,8 @@ class ProgressReporter extends StdoutReporter {
 
 class itemPDF {
   String desc;
-  bool isPassed;
+  bool isPassed = false;
   itemPDF({
-   this.desc,this.isPassed
+    this.desc,this.isPassed
   });
 }
