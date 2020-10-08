@@ -56,7 +56,7 @@ class ProgressReporter extends StdoutReporter {
                           textAlign: pw.TextAlign.left,
                           style: TextStyle(
                               fontSize: 12,
-                              color: scenarioList[index].isPassed != null ? scenarioList[index].isPassed ? PdfColor(0,10,0) : PdfColor(10,0,0) : PdfColor(0,0,0)
+                              color: scenarioList[index].isPassed != null ? scenarioList[index].isPassed ? PdfColor(0,3,0) : PdfColor(10,0,0) : PdfColor(0,0,0)
                           )
                       )
                   );
@@ -80,7 +80,7 @@ class ProgressReporter extends StdoutReporter {
   @override
   Future<void> onStepFinished(StepFinishedMessage message) async {
     // scenarioList.add('');
-    scenarioList.add(itemPDF(desc: '${message.name}',isPassed: true));
+    scenarioList.add(itemPDF(desc: '${message.name}',isPassed: _isPassed(message.result.result)));
 
 
     printMessageLine(
@@ -159,19 +159,19 @@ class ProgressReporter extends StdoutReporter {
     return '';
   }
 
-  // String _isPassed(StepExecutionResult result) {
-  //   switch (result) {
-  //     case StepExecutionResult.pass:
-  //       return true;
-  //     case StepExecutionResult.error:
-  //     case StepExecutionResult.fail:
-  //     case StepExecutionResult.timeout:
-  //       return false;
-  //     case StepExecutionResult.skipped:
-  //       return false;
-  //   }
-  //   return false;
-  // }
+  bool _isPassed(StepExecutionResult result) {
+    switch (result) {
+      case StepExecutionResult.pass:
+        return true;
+      case StepExecutionResult.error:
+      case StepExecutionResult.fail:
+      case StepExecutionResult.timeout:
+        return false;
+      case StepExecutionResult.skipped:
+        return false;
+    }
+    return false;
+  }
 
   String _getMessageColour(StepExecutionResult result) {
     switch (result) {
